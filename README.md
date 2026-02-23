@@ -8,6 +8,7 @@ Curso empresarial sobre Integración y Despliegue Continuo (CI/CD) utilizando co
 |--------|-------------|--------|
 | [Módulo I](./modulo-1/README.md) | Fundamentos de Contenedores, Docker y Docker Compose | ✅ Disponible |
 | [Módulo II](./modulo-2/README.md) | Fundamentos de CI/CD y DevOps | ✅ Disponible |
+| [Módulo III](./modulo-3/README.md) | Implementación de Integración Continua | ✅ Disponible |
 
 ## Módulo I: Integración y Despliegue Continuo con Contenedores
 
@@ -35,6 +36,21 @@ Construye sobre los contenedores del Módulo I para enseñar la capa cultural y 
 - **Recursos:** Libros, cursos, videos, artículos, herramientas y comunidades
 
 ➡️ [Ir al Módulo II](./modulo-2/README.md)
+
+## Módulo III: Implementación de Integración Continua
+
+Lleva la CI del concepto a la práctica con GitHub Actions y Jenkins:
+
+- **Introducción:** Impacto de CI — estadísticas DORA, Google a escala, el costo de no tener CI
+- **Tema 1:** Integración con repositorios — webhooks vs. polling, Branch Policies, GitHub Flow
+- **Tema 2:** Pipeline as Code — anatomía de un pipeline, beneficios del versionado, paralelismo
+- **Tema 3:** Automatización de builds y pruebas — feedback rápido, Fail Fast, cobertura de código (JaCoCo)
+- **Tema 4:** Mejores prácticas — cordón de Andon, Trunk-Based Development, Construir Una Vez
+- **Tema 5:** GitHub Actions en profundidad — workflows YAML, Docker CI/CD, matrices de pruebas, secretos
+- **Tema 6:** Jenkins en profundidad — arquitectura Controller/Agent, Jenkinsfile declarativo, plugins esenciales
+- **Tema 7:** Casos de estudio — HP LaserJet (42x), Bazaarvoice, Google (75M pruebas/día), Etsy (50 deploys/día)
+
+➡️ [Ir al Módulo III](./modulo-3/README.md)
 
 ## Requisitos Previos
 
