@@ -35,6 +35,7 @@ Al completar este módulo, el estudiante será capaz de:
 | 7 | Monitoreo y Feedback Loops | [07-monitoreo-feedback-loops.md](./07-monitoreo-feedback-loops.md) |
 | 8 | Casos de Estudio Reales | [08-casos-de-estudio.md](./08-casos-de-estudio.md) |
 | 9 | Cierre del Módulo | [09-cierre.md](./09-cierre.md) |
+| 10 | Workshop y Casos Prácticos | [10-workshop-casos-practicos.md](./10-workshop-casos-practicos.md) |
 
 ---
 
