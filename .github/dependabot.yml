@@ -1,0 +1,35 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Dependabot — Escaneo Automático de Dependencias (Nivel 2)
+# Documentación: https://docs.github.com/es/code-security/dependabot
+# ══════════════════════════════════════════════════════════════════════════════
+
+version: 2
+
+updates:
+  # Actualizar dependencias de Node.js en coindash-api
+  - package-ecosystem: 'npm'
+    directory: '/coindash-api'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '08:00'
+      timezone: 'America/Bogota'
+    open-pull-requests-limit: 5
+    labels:
+      - 'dependencies'
+      - 'security'
+    commit-message:
+      prefix: 'fix(deps)'
+      prefix-development: 'chore(deps-dev)'
+
+  # Mantener actualizados los GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    labels:
+      - 'dependencies'
+      - 'github-actions'
+    commit-message:
+      prefix: 'ci'

@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      target: production
+    image: coindash-api:latest
+    container_name: coindash-api
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Servicio solo para correr pruebas
+  test:
+    build:
+      context: .
+      target: builder
+    image: coindash-api:test
+    container_name: coindash-api-test
+    command: npm test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    profiles:
+      - test

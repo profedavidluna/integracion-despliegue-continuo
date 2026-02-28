@@ -1,0 +1,117 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# 🟢 NIVEL 1: El Despertar del Pipeline (Básico)
+# Laboratorio Clase 2 — CoinDash
+#
+# Objetivo: Automatizar el flujo Build → Test → Deploy de la API de Node.js
+# Documentación: https://docs.github.com/es/actions
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: 'Nivel 1 — Pipeline CI/CD Básico'
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+    paths:
+      - 'coindash-api/**'
+      - '.github/workflows/nivel-1.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'coindash-api/**'
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Etapa 1: Build ──────────────────────────────────────────────────────────
+  build:
+    name: '🔨 Build — Instalación de dependencias'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: coindash-api
+
+    steps:
+      - name: Checkout del código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: coindash-api/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Guardar node_modules en caché para etapas siguientes
+        uses: actions/cache@v4
+        with:
+          path: coindash-api/node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('coindash-api/package-lock.json') }}
+
+  # ── Etapa 2: Test ───────────────────────────────────────────────────────────
+  test:
+    name: '🧪 Test — Pruebas unitarias'
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        working-directory: coindash-api
+
+    steps:
+      - name: Checkout del código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: coindash-api/package-lock.json
+
+      - name: Restaurar node_modules desde caché
+        uses: actions/cache@v4
+        with:
+          path: coindash-api/node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('coindash-api/package-lock.json') }}
+
+      - name: Ejecutar pruebas unitarias con cobertura
+        run: npm test
+
+      - name: Publicar reporte de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coindash-api/coverage/
+
+  # ── Etapa 3: Deploy ─────────────────────────────────────────────────────────
+  deploy:
+    name: '🚀 Deploy — Simulación de despliegue'
+    runs-on: ubuntu-latest
+    needs: test
+    # Solo hacer deploy desde la rama main
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout del código fuente
+        uses: actions/checkout@v4
+
+      - name: Simular despliegue a producción
+        run: |
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║  🚀 CoinDash API — Desplegando a producción  ║"
+          echo "╚══════════════════════════════════════════════╝"
+          echo ""
+          echo "📦 Versión: $(node -p "require('./coindash-api/package.json').version")"
+          echo "🌿 Rama: ${{ github.ref_name }}"
+          echo "📝 Commit: ${{ github.sha }}"
+          echo "👤 Autor: ${{ github.actor }}"
+          echo ""
+          echo "✅ Despliegue completado exitosamente"
+          echo "🌐 URL: https://api.coindash.io (simulado)"

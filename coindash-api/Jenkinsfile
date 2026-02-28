@@ -1,0 +1,145 @@
+/*
+ * ══════════════════════════════════════════════════════════════════════════════
+ * 🟠 NIVEL 3: El Gran Duelo de Orquestadores (Avanzado)
+ * Laboratorio Clase 2 — CoinDash
+ *
+ * Objetivo: Implementar el mismo pipeline de CI/CD en Jenkins para comparar
+ *           con GitHub Actions (Nivel 1 y 2).
+ *
+ * Prerrequisitos:
+ *   - Jenkins con plugin "Pipeline" instalado
+ *   - Docker disponible en el agente Jenkins
+ *   - Node.js 20 disponible en el agente (o usar imagen Docker)
+ *
+ * Cuadro Comparativo (para el debate):
+ *   | Criterio            | Jenkins          | GitHub Actions       |
+ *   |---------------------|------------------|----------------------|
+ *   | Time-to-Setup       | Alto (autohosted)| Bajo (cloud managed) |
+ *   | Visibilidad errores | Blue Ocean UI    | UI nativa integrada  |
+ *   | Costo startup       | Infra propia     | Gratis (2000 min/mes)|
+ * ══════════════════════════════════════════════════════════════════════════════
+ */
+
+pipeline {
+    agent {
+        docker {
+            image 'node:20-alpine'
+            args '-u root'
+        }
+    }
+
+    environment {
+        // Las credenciales se gestionan en Jenkins Credentials Manager
+        API_SECRET_KEY = credentials('coindash-api-secret-key')
+        NODE_ENV       = 'test'
+    }
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        // ── Etapa 1: Checkout ────────────────────────────────────────────────
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo "🌿 Rama: ${env.GIT_BRANCH}"
+                echo "📝 Commit: ${env.GIT_COMMIT}"
+            }
+        }
+
+        // ── Etapa 2: Build ───────────────────────────────────────────────────
+        stage('Build') {
+            steps {
+                dir('coindash-api') {
+                    echo '🔨 Instalando dependencias...'
+                    sh 'npm ci'
+                    echo '✅ Dependencias instaladas'
+                }
+            }
+        }
+
+        // ── Etapa 3: Test ────────────────────────────────────────────────────
+        stage('Test') {
+            steps {
+                dir('coindash-api') {
+                    echo '🧪 Ejecutando pruebas unitarias...'
+                    sh 'npm test'
+                }
+            }
+            post {
+                always {
+                    // Publicar reporte de cobertura en Jenkins
+                    publishHTML(target: [
+                        allowMissing         : false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll              : true,
+                        reportDir            : 'coindash-api/coverage/lcov-report',
+                        reportFiles          : 'index.html',
+                        reportName           : 'Coverage Report'
+                    ])
+                }
+            }
+        }
+
+        // ── Etapa 4: Security Scan ───────────────────────────────────────────
+        stage('Security Scan') {
+            steps {
+                dir('coindash-api') {
+                    echo '🔍 Auditando dependencias...'
+                    sh 'npm audit --audit-level=critical || true'
+                }
+            }
+        }
+
+        // ── Etapa 5: Docker Build ────────────────────────────────────────────
+        stage('Docker Build') {
+            when {
+                branch 'main'
+            }
+            agent {
+                label 'docker'
+            }
+            steps {
+                echo '🐳 Construyendo imagen Docker...'
+                sh "docker build -t coindash-api:${env.GIT_COMMIT} ./coindash-api"
+                echo '✅ Imagen construida exitosamente'
+            }
+        }
+
+        // ── Etapa 6: Deploy ──────────────────────────────────────────────────
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo '╔════════════════════════════════════════╗'
+                echo '║  🚀 CoinDash API — Deploy (Jenkins)    ║'
+                echo '╚════════════════════════════════════════╝'
+                echo "📦 Versión: ${env.GIT_COMMIT}"
+                echo '✅ Despliegue simulado completado'
+                echo '🌐 URL: https://api.coindash.io (simulado)'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline completado exitosamente'
+        }
+        failure {
+            echo '❌ Pipeline falló — revisa los logs arriba'
+            // ⭐ BONUS: Notificación de Slack cuando falla el pipeline
+            // slackSend(
+            //   channel: '#coindash-deploys',
+            //   color: 'danger',
+            //   message: "❌ Pipeline falló en ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}"
+            // )
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
