@@ -125,7 +125,7 @@ jobs:
         run: docker build -t coindash-api:${{ github.sha }} ./coindash-api
 
       - name: Escanear imagen con Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.34.1
         with:
           image-ref: 'coindash-api:${{ github.sha }}'
           format: 'sarif'
@@ -151,11 +151,9 @@ jobs:
           fetch-depth: 0
 
       - name: Buscar secretos con TruffleHog
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.93.6
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
           extra_args: --debug --only-verified
 
   # ── Deploy con Secretos de GitHub ───────────────────────────────────────────
