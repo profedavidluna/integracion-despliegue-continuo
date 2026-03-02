@@ -90,17 +90,65 @@ jobs:
           name: coverage-report
           path: coindash-api/coverage/
 
-  # ── Etapa 3: Deploy ─────────────────────────────────────────────────────────
+  # ── Etapa 3: Containerize ───────────────────────────────────────────────────
+  containerize:
+    name: '🐳 Containerize — Construir imagen Docker'
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout del código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar caché de capas Docker
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: buildx-${{ runner.os }}-${{ hashFiles('coindash-api/Dockerfile', 'coindash-api/package-lock.json') }}
+          restore-keys: buildx-${{ runner.os }}-
+
+      - name: Construir imagen Docker
+        run: |
+          docker build \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to   type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            -t coindash-api:${{ github.sha }} \
+            ./coindash-api
+
+      - name: Mover caché (evita crecimiento indefinido)
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Exportar imagen como artefacto
+        run: docker save coindash-api:${{ github.sha }} | gzip > /tmp/coindash-api.tar.gz
+
+      - name: Subir imagen Docker como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp/coindash-api.tar.gz
+
+  # ── Etapa 4: Deploy ─────────────────────────────────────────────────────────
   deploy:
     name: '🚀 Deploy — Simulación de despliegue'
     runs-on: ubuntu-latest
-    needs: test
+    needs: containerize
     # Solo hacer deploy desde la rama main
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout del código fuente
         uses: actions/checkout@v4
+
+      - name: Descargar imagen Docker
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Cargar imagen Docker
+        run: docker load < /tmp/coindash-api.tar.gz
 
       - name: Simular despliegue a producción
         run: |
@@ -109,6 +157,7 @@ jobs:
           echo "╚══════════════════════════════════════════════╝"
           echo ""
           echo "📦 Versión: $(node -p "require('./coindash-api/package.json').version")"
+          echo "🐳 Imagen: coindash-api:${{ github.sha }}"
           echo "🌿 Rama: ${{ github.ref_name }}"
           echo "📝 Commit: ${{ github.sha }}"
           echo "👤 Autor: ${{ github.actor }}"
