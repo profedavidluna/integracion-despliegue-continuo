@@ -10,7 +10,7 @@ Curso empresarial sobre Integración y Despliegue Continuo (CI/CD) utilizando co
 | [Módulo II](./modulo-2/README.md) | Fundamentos de CI/CD y DevOps | ✅ Disponible |
 | [Módulo III](./modulo-3/README.md) | Implementación de Integración Continua | ✅ Disponible |
 
-## Módulo I: Integración y Despliegue Continuo con Contenedores
+## Módulo I: Integración y Despliegue Continuo con Contenedores. Prueba
 
 Cubre desde la justificación de negocio hasta la práctica técnica:
 
