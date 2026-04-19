@@ -49,7 +49,7 @@ jobs:
         run: npm ci
 
       - name: Guardar node_modules en caché para etapas siguientes
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: coindash-api/node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('coindash-api/package-lock.json') }}
@@ -75,7 +75,7 @@ jobs:
           cache-dependency-path: coindash-api/package-lock.json
 
       - name: Restaurar node_modules desde caché
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: coindash-api/node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('coindash-api/package-lock.json') }}
