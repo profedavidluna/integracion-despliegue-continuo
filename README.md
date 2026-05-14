@@ -1,6 +1,6 @@
 # Integración y Despliegue Continuo con Contenedores
 
-Curso empresarial sobre Integración y Despliegue Continuo (CI/CD) utilizando contenedores como unidad estándar de entrega de software.
+Curso empresarial sobre Integración y Despliegue Continuo (CI/CD) utilizando contenedores como unidad estándar de entrega de software....
 
 ## Estructura del Curso
 
